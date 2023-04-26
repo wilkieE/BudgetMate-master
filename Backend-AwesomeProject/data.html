@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Budgets</title>
+	<style>
+		body {
+			font-family: 'Open Sans', sans-serif;
+			font-weight: 300;
+			line-height: 1.42em;
+			color: #A7A1AE;
+			background-color: #1F2739;
+		}
+
+		h1 {
+			font-size: 3em;
+			font-weight: 300;
+			line-height: 1em;
+			text-align: center;
+			color: #4DC3FA;
+		}
+
+		h2 {
+			font-size: 1em;
+			font-weight: 300;
+			text-align: center;
+			display: block;
+			line-height: 1em;
+			padding-bottom: 2em;
+			color: #FB667A;
+		}
+
+		h2 a {
+			font-weight: 700;
+			text-transform: uppercase;
+			color: #FB667A;
+			text-decoration: none;
+		}
+
+		.blue { color: #185875; }
+		.yellow { color: #FFF842; }
+
+		.container th h1 {
+			font-weight: bold;
+			font-size: 1em;
+			text-align: left;
+			color: #185875;
+		}
+
+		.container td {
+			font-weight: normal;
+			font-size: 1em;
+			-webkit-box-shadow: 0 2px 2px -2px #0E1119;
+			-moz-box-shadow: 0 2px 2px -2px #0E1119;
+			box-shadow: 0 2px 2px -2px #0E1119;
+		}
+
+		.container {
+			text-align: left;
+			overflow: hidden;
+			width: 100%;
+			margin: 0 auto;
+			display: table;
+			padding: 0 0 8em 0;
+			border-collapse: collapse;
+			background-color: #2C3446;
+			color: #fff;
+		}
+
+		.container td, .container th {
+			padding: 1em;
+			border: 1px solid #4d4d4d;
+		}
+
+		/* Background-color of the odd rows */
+		.container tr:nth-child(odd) {
+			background-color: #323C50;
+		}
+
+		/* Background-color of the even rows */
+		.container tr:nth-child(even) {
+			background-color: #2C3446;
+		}
+
+		.container th {
+			background-color: #1F2739;
+			color: #fff;
+			font-weight: bold;
+			border: 1px solid #4d4d4d;
+			padding: 1em;
+			text-align: left;
+		}
+
+		.container td:first-child {
+			color: #FB667A;
+		}
+
+		.container tr:hover {
+			background-color: #464A52;
+			-webkit-box-shadow: 0 6px 6px -6px #0E1119;
+			-moz-box-shadow: 0 6px 6px -6px #0E1119;
+			box-shadow: 0 6px 6px -6px #0E1119;
+		}
+
+		.container td:hover {
+			background-color: #FFF842;
+			color: #403E10;
+			font-weight: bold;
+			box-shadow: #7F7C21 -1px 1px, #7F7C21 -2px 2px, #7F7C21 -3px 3px, #7F7C21 -4px 4px, #7F7C21 -5px 5px, #7F7C21 -6px 6px;
+			transform: translate3d(6px, -6px, 0);
+			transition-delay: 0s;
+			transition-duration: 0.4s;
+			transition-property: all;
+			transition-timing-function: line;
+		}
+		button {
+			background-color: #3D3B5E;
+			color: #EEE9E8;
+			border: none;
+			padding: 0.5em 1em;
+			border-radius: 0.5em;
+			cursor: pointer;
+			margin-right: 0.5em;
+			}
+
+		button:hover {
+			background-color: #C4BDE4;
+			}
+
+		.approve-button {
+			background-color: #4CAF50;
+			}
+
+		.approve-button:hover {
+			background-color: #C4BDE4;
+			}
+
+		.reject-button {
+			background-color: #FF3D00;
+			}
+
+		.reject-button:hover {
+			background-color: #C4BDE4;
+			}
+		
+		.links, .filter-container,table.container{
+			text-align: center;
+    		padding: 10px 30px;
+		}
+		table.container{
+    		width: 80%;
+		}
+
+
+		@media (max-width: 800px) {
+			.container td:nth-child(4),
+			.container th:nth-child(4) { display: none; }
+		}
+	</style>
+</head>
+<body>
+	<h1>Budgets</h1>
+	<div class="links">
+		<button id="download-csv-button">Download CSV</button>
+		<button onclick="window.location.href='/collections'">Collections</button>
+	</div>
+	<div class="filter-container">
+		<label for="status-select">Filter by status:</label>
+		<select id="status-select" class="status-select">
+			<option value="Pending">Pending</option>
+			<option value="Approved">Approved</option>
+			<option value="Rejected">Rejected</option>
+		</select>
+	</div>
+	<table class="container">
+		<thead>
+			<tr>
+				<th>User</th>
+				<th>Organization</th>
+				<th>Project</th>
+				<th>Fund</th>
+				<th>Expense</th>
+				<th>Fiscal Year Quarter</th>
+				<th>Description</th>
+				<th>Amount</th>
+				<th>Continuous?</th>
+				<th>Expected Payment Amount</th>
+				<th>Expected Payment Date</th>
+				<th>Status</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody id="budgets-table">
+		</tbody>
+	</table>
+	<script>
+		const tableBody = document.getElementById('budgets-table');
+		const statusSelect = document.getElementById('status-select');
+		const downloadButton = document.getElementById('download-csv-button');
+	  
+		function refreshTable() {
+		  const status = statusSelect.value;
+	  
+		  fetch(`/budgets?status=${status}`)
+			.then(response => response.json())
+			.then(budgets => {
+			  tableBody.innerHTML = '';
+			  budgets.forEach(budget => {
+				const row = tableBody.insertRow();
+				row.insertCell().textContent = budget.user;
+				row.insertCell().textContent = budget.organization;
+				row.insertCell().textContent = budget.project;
+				row.insertCell().textContent = budget.fund;
+				row.insertCell().textContent = budget.Expense;
+				row.insertCell().textContent = budget.fiscalYearQuarter;
+				row.insertCell().textContent = budget.description;
+				row.insertCell().textContent = budget.amount;
+				row.insertCell().textContent = budget.isApproved ? 'Yes' : 'No';
+				row.insertCell().textContent = budget.expectedPaymentAmount;
+				row.insertCell().textContent = new Date(budget.expectedPaymentDate).toLocaleDateString();
+				row.insertCell().textContent = budget.status;
+				const actionsCell = row.insertCell();
+				if (budget.status === 'Pending') {
+				  const approveButton = document.createElement('button');
+				  approveButton.textContent = 'Approve';
+				  approveButton.classList.add('approve-button');
+				  approveButton.addEventListener('click', () => updateBudgetStatus(budget._id, 'Approved'));
+				  actionsCell.appendChild(approveButton);
+				  const rejectButton = document.createElement('button');
+				  rejectButton.textContent = 'Reject';
+				  rejectButton.addEventListener('click', () => updateBudgetStatus(budget._id, 'Rejected'));
+				  actionsCell.appendChild(rejectButton);
+				}
+			  });
+			})
+			.catch(error => console.log(error));
+		}
+	  
+		function updateBudgetStatus(budgetId, status) {
+		  fetch(`/budgets/${budgetId}`, {
+			method: 'PATCH',
+			headers: {
+			  'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ status })
+		  })
+			.then(response => response.json())
+			.then(() => refreshTable())
+			.catch(error => console.log(error));
+		}
+	  
+		function downloadCSV() {
+		  const headers = Array.from(document.querySelectorAll('thead th')).map(th => th.textContent);
+		  const rows = Array.from(document.querySelectorAll('#budgets-table tr')).map(tr => Array.from(tr.querySelectorAll('td')).map(td => td.textContent));
+		  const csv = [headers, ...rows].map(row => row.map(val => `"${val}"`).join(',')).join('\n');
+		  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		  const url = URL.createObjectURL(blob);
+		  const link = document.createElement("a");
+		  link.setAttribute("href", url);
+		  link.setAttribute("download", "budgets.csv");
+		  link.style.visibility = 'hidden';
+		  document.body.appendChild(link);
+		  link.click();
+		  document.body.removeChild(link);
+		}
+	  
+		statusSelect.addEventListener('change', () => refreshTable());
+		downloadButton.addEventListener('click', () => downloadCSV());
+		refreshTable();
+	  </script>
+</body>
+</html>
+
+

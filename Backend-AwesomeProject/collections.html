@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Collections</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        var currentCollection = "Organization";
+        document.querySelectorAll('.itemName').forEach(element => {
+            element.innerHTML=currentCollection;
+          }); 
+        
+        $("#collection-select").change(function() {
+          var collectionName = $(this).val();
+          currentCollection = collectionName;
+          loadCollection(collectionName);
+          document.querySelectorAll('.itemName').forEach(element => {
+            element.innerHTML=collectionName;
+          }); 
+        });
+        
+        function loadCollection(collectionName) {
+          $.get("/collections/" + collectionName, function(data) {
+            var table = $("#collection-table");
+            table.empty();
+            table.append("<tr><th>Code</th><th>Name</th><th>Action</th></tr>");
+            for (var i = 0; i < data.length; i++) {
+              var row = $("<tr><td>" + data[i].code + "</td><td>" + data[i].name + "</td></tr>");
+              var removeBtn = $("<button>Delete</button>");
+              removeBtn.click(function() {
+                var code = $(this).closest("tr").find("td:first").text();
+                deleteRow(currentCollection, code);
+              });
+              row.append("<td></td>").find("td:last").append(removeBtn);
+              table.append(row);
+            }
+          });
+        }
+        
+        function deleteRow(collectionName, code) {
+          $.ajax({
+            url: "/collections/" + collectionName + "/" + code,
+            type: "DELETE",
+            success: function() {
+              loadCollection(currentCollection);
+            }
+          });
+        }
+  $("#add-form").submit(function(event) {
+    event.preventDefault();
+    var code = $("#code-input").val();
+    var name = $("#name-input").val();
+    $.post("/collections/" + currentCollection, {code: code, name: name}, function() {
+      loadCollection(currentCollection);
+      $("#code-input").val("");
+      $("#name-input").val("");
+    });
+  });
+
+  loadCollection(currentCollection);
+});
+    </script>
+	<style>
+    body {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.42em;
+    color: #A7A1AE;
+    background-color: #1F2739;
+}
+
+h1 {
+    font-size: 3em;
+    font-weight: 300;
+    line-height: 1em;
+    text-align: center;
+    color: #4DC3FA;
+}
+
+h2 {
+    font-size: 1.8em;
+    font-weight: 500;
+    text-align: left;
+    display: block;
+    line-height: 1em;
+    /* color: #FB667A; */
+    text-align: center;
+    color: #4DC3FA;
+    padding-bottom: 0px;
+}
+
+h2 a {
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #FB667A;
+    text-decoration: none;
+}
+
+.blue { color: #185875; }
+.yellow { color: #FFF842; }
+
+.container th h1 {
+    font-weight: bold;
+    font-size: 1em;
+    text-align: left;
+    color: #185875;
+}
+
+.container td {
+    font-weight: normal;
+    font-size: 1em;
+    -webkit-box-shadow: 0 2px 2px -2px #0E1119;
+    -moz-box-shadow: 0 2px 2px -2px #0E1119;
+    box-shadow: 0 2px 2px -2px #0E1119;
+}
+
+.container {
+    text-align: left;
+    overflow: hidden;
+    width: 100%;
+    margin: 0 auto;
+    display: table;
+    padding: 0 0 8em 0;
+    border-collapse: collapse;
+    background-color: #2C3446;
+    color: #fff;
+}
+
+.container td, .container th {
+    padding: 1em;
+    border: 1px solid #4d4d4d;
+}
+
+/* Background-color of the odd rows */
+.container tr:nth-child(odd) {
+    background-color: #323C50;
+}
+
+/* Background-color of the even rows */
+.container tr:nth-child(even) {
+    background-color: #2C3446;
+}
+
+.container th {
+    background-color: #1F2739;
+    color: #fff;
+    font-weight: bold;
+    border: 1px solid #4d4d4d;
+    padding: 1em;
+    text-align: left;
+}
+
+.container td:first-child {
+    color: #FB667A;
+}
+
+.container tr:hover {
+    background-color: #464A52;
+    -webkit-box-shadow: 0 6px 6px -6px #0E1119;
+    -moz-box-shadow: 0 6px 6px -6px #0E1119;
+    box-shadow: 0 6px 6px -6px #0E1119;
+}
+
+.container td:hover {
+    background-color: #FFF842;
+    color: #403E10;
+    font-weight: bold;
+    box-shadow: #7F7C21 -1px 1px, #7F7C21 -2px 2px, #7F7C21 -3px 3px, #7F7C21 -4px 4px, #7F7C21 -5px 5px, #7F7C21 -6px 6px;
+    transform: translate3d(6px, -6px, 0);
+    transition-delay: 0s;
+    transition-duration: 0.4s;
+    transition-property: all;
+    transition-timing-function: line;
+}
+button {
+    background-color: #3D3B5E;
+    color: #EEE9E8;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 0.5em;
+    cursor: pointer;
+    margin-right: 0.5em;
+    }
+
+button:hover {
+    background-color: #C4BDE4;
+    }
+
+    
+		.links, .filter-container,table.container,.inputContainer{
+			text-align: center;
+    		padding: 10px 30px;
+		}
+		table.container{
+    		width: 80%;
+		}
+    .inputContainer{
+      padding-top: 3em;
+    }
+@media (max-width: 600px) {
+    .main {
+        border-radius: 0px;
+    }
+}
+	</style>
+  </head>
+  <body>
+    <h1>Collections - <span class="itemName"></span> </h1>
+
+    <div class="links">
+      <button id="download-csv-button">Download CSV</button>
+      <button onclick="window.location.href='/'">Budgets</button>
+    </div>
+    <div class="filter-container">
+    <label for="collection-select">Select a collection:</label>
+    <select id="collection-select">
+      <option value="Organization">Organizations</option>
+      <option value="Project">Projects</option>
+      <option value="Fund">Funds</option>
+      <option value="PhoneNumber">Phone Numbers</option>
+      <option value="Expense">Expenses</option>
+    </select>
+    </div>
+    <table id="collection-table", class="container"></table>
+    <div class="inputContainer" id="Create">
+      <h2>Create New <span class="itemName"></span></h2>
+      <p>Enter a new code and name pair</p>
+      <form id="add-form">
+        <label for="code-input">Code:</label>
+        <input type="text" id="code-input">
+        <label for="name-input">Name:</label>
+        <input type="text" id="name-input">
+        <button type="submit">Add</button>
+      </form>
+      </div>
+  </body>
+</html>

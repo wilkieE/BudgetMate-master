@@ -1,0 +1,31 @@
+{
+  "name": "email_server",
+  "version": "1.0.0",
+  "description": "email server",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ejiro wilkie",
+  "license": "ISC",
+  "dependencies": {
+    "basic-auth": "^2.0.1",
+    "connect-mongodb-session": "^3.1.1",
+    "cors": "^2.8.5",
+    "crypto-js": "3.3.0",
+    "cryptojs": "^2.5.3",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "expresss": "^0.0.0",
+    "https": "^1.0.0",
+    "mongodb": "^5.1.0",
+    "mongoose": "^6.10.0",
+    "nodemon": "^2.0.20",
+    "pouchdb": "^8.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^4.6.2",
+    "twilio": "^4.8.0"
+  }
+}
